@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agente IA — Inovação Tecnológica na Educação</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F3EE;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE6;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --text: #1A1814;
+    --text2: #6B6760;
+    --text3: #9B9890;
+    --accent: #2D6A4F;
+    --accent-light: #D8EDDF;
+    --accent-mid: #52B788;
+    --user-bg: #1A3C2C;
+    --user-text: #E8F5EE;
+    --tag-bg: #EAF4EE;
+    --tag-text: #1B5E38;
+    --think-bg: #FEF9EE;
+    --think-border: #F0D080;
+    --think-text: #7A5C00;
+    --act-bg: #EEF3FE;
+    --act-border: #9BB4F0;
+    --act-text: #1A3A8F;
+    --obs-bg: #F0FAF5;
+    --obs-border: #7DCCA0;
+    --obs-text: #0F5132;
+    --radius: 16px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+
+  .widget {
+    width: 100%;
+    max-width: 680px;
+    background: var(--surface);
+    border-radius: 24px;
+    border: 1px solid var(--border2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 560px;
+    max-height: 90vh;
+  }
+
+  /* Header */
+  .header {
+    background: var(--user-bg);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+  .header-icon {
+    width: 44px; height: 44px;
+    background: var(--accent-mid);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .header-icon svg { width: 22px; height: 22px; }
+  .header-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: #E8F5EE; line-height: 1.3; }
+  .header-sub { font-size: 11px; color: rgba(232,245,238,0.55); margin-top: 2px; letter-spacing: 0.3px; }
+  .status-pill {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px; padding: 4px 10px;
+    font-size: 11px; color: rgba(232,245,238,0.7);
+    flex-shrink: 0;
+  }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-mid); }
+  .status-dot.loading { background: #F0C040; animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* Suggestions */
+  .suggestions-wrap {
+    padding: 16px 20px 8px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .suggestions-label { font-size: 11px; color: var(--text3); letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 8px; }
+  .suggestions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sug {
+    font-size: 12px; font-family: 'Sora', sans-serif;
+    padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--border2);
+    background: transparent; color: var(--text2);
+    cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .sug:hover { background: var(--accent-light); border-color: var(--accent-mid); color: var(--accent); }
+
+  /* Chat */
+  .chat-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scroll-behavior: smooth;
+  }
+  .chat-area::-webkit-scrollbar { width: 4px; }
+  .chat-area::-webkit-scrollbar-track { background: transparent; }
+  .chat-area::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+  .welcome {
+    text-align: center;
+    padding: 28px 16px;
+    color: var(--text3);
+  }
+  .welcome-icon {
+    width: 52px; height: 52px; border-radius: 16px;
+    background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+  }
+  .welcome-icon svg { width: 26px; height: 26px; color: var(--accent); }
+  .welcome h3 { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); margin-bottom: 6px; }
+  .welcome p { font-size: 13px; line-height: 1.6; max-width: 320px; margin: 0 auto; }
+
+  .msg-user {
+    align-self: flex-end;
+    max-width: 78%;
+    background: var(--user-bg);
+    color: var(--user-text);
+    padding: 10px 16px;
+    border-radius: 18px 18px 4px 18px;
+    font-size: 14px; line-height: 1.5;
+  }
+
+  .msg-agent {
+    align-self: flex-start;
+    max-width: 96%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .step {
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .step-label {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.6px; text-transform: uppercase;
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .step-label::before {
+    content: '';
+    display: inline-block; width: 5px; height: 5px;
+    border-radius: 50%;
+  }
+  .step-text { color: inherit; white-space: pre-wrap; }
+
+  .step.think { background: var(--think-bg); border-left: 3px solid var(--think-border); color: var(--think-text); }
+  .step.think .step-label { color: var(--think-text); }
+  .step.think .step-label::before { background: var(--think-border); }
+
+  .step.act { background: var(--act-bg); border-left: 3px solid var(--act-border); color: var(--act-text); }
+  .step.act .step-label { color: var(--act-text); }
+  .step.act .step-label::before { background: var(--act-border); }
+
+  .step.obs { background: var(--obs-bg); border-left: 3px solid var(--obs-border); color: var(--obs-text); }
+  .step.obs .step-label { color: var(--obs-text); }
+  .step.obs .step-label::before { background: var(--obs-border); }
+
+  .step.answer {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-size: 14px;
+    border-radius: var(--radius-sm);
+  }
+  .step.answer .step-label { color: var(--accent); }
+  .step.answer .step-label::before { background: var(--accent-mid); }
+
+  .typing {
+    display: flex; align-items: center; gap: 5px;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    width: fit-content;
+  }
+  .typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text3);
+    animation: bounce 1.2s ease-in-out infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+  /* Input */
+  .input-wrap {
+    padding: 14px 20px 18px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .input-row {
+    display: flex; gap: 8px; align-items: flex-end;
+  }
+  .input-box {
+    flex: 1;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border2);
+    background: var(--bg);
+    color: var(--text);
+    resize: none;
+    min-height: 42px;
+    max-height: 120px;
+    outline: none;
+    line-height: 1.5;
+    transition: border-color 0.15s;
+  }
+  .input-box:focus { border-color: var(--accent-mid); }
+  .input-box::placeholder { color: var(--text3); }
+  .send-btn {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: var(--user-bg);
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .send-btn:hover:not(:disabled) { background: var(--accent); }
+  .send-btn:active:not(:disabled) { transform: scale(0.95); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .send-btn svg { width: 18px; height: 18px; color: white; }
+
+  .branding {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 8px;
+    letter-spacing: 0.2px;
+  }
+  .branding a { color: var(--text3); text-decoration: none; }
+  .branding a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="widget">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-title">Inovação Tecnológica na Educação</div>
+      <div class="header-sub">Luiz de Castro · Adm. de Empresas | Mestre em Gestão</div>
+      <div class="header-sub" style="margin-top:1px;">Assistente especializado · lojasdecastro.com.br</div>
+    </div>
+    <div class="status-pill">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Online</span>
+    </div>
+  </div>
+
+  <!-- Suggestions -->
+  <div class="suggestions-wrap">
+    <div class="suggestions-label">Perguntas frequentes</div>
+    <div class="suggestions">
+      <button class="sug" onclick="suggest('O que é educação híbrida e como funciona?')">Educação híbrida</button>
+      <button class="sug" onclick="suggest('Como a inteligência artificial está sendo usada nas escolas?')">IA nas escolas</button>
+      <button class="sug" onclick="suggest('Quais são as melhores plataformas de ensino online?')">Plataformas EAD</button>
+      <button class="sug" onclick="suggest('O que é gamificação na educação?')">Gamificação</button>
+      <button class="sug" onclick="suggest('Como a realidade aumentada pode ser usada em sala de aula?')">Realidade aumentada</button>
+      <button class="sug" onclick="suggest('Quais tecnologias estão transformando o ensino em 2025?')">Tendências 2025</button>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-area" id="chatArea">
+    <div class="welcome">
+      <div class="welcome-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 16v-4m0-4h.01"/>
+        </svg>
+      </div>
+      <h3>Olá! Como posso ajudar?</h3>
+      <p>Sou especialista em inovação tecnológica na educação. Pergunte sobre EdTech, EAD, IA no ensino, gamificação e muito mais.</p>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-wrap">
+    <div class="input-row">
+      <textarea
+        class="input-box"
+        id="userInput"
+        placeholder="Digite sua pergunta sobre tecnologia e educação..."
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+    <div class="branding">Desenvolvido com IA · <a href="https://www.lojasdecastro.com.br" target="_blank">lojasdecastro.com.br</a></div>
+  </div>
+</div>
+
+<script>
+const SYSTEM_PROMPT = `Você é um assistente especialista em Inovação Tecnológica na Educação, integrado ao site lojasdecastro.com.br.
+
+Seu escopo de atuação:
+- EdTech (tecnologia educacional) e suas tendências
+- Ensino a distância (EAD) e plataformas de aprendizado online
+- Inteligência artificial aplicada à educação
+- Gamificação e metodologias ativas com tecnologia
+- Realidade aumentada e virtual no ensino
+- Ferramentas digitais para professores e alunos
+- Inovações pedagógicas com suporte tecnológico
+- Personalização do aprendizado com dados e IA
+- Educação híbrida (presencial + digital)
+
+Regras:
+- Responda SEMPRE em português do Brasil
+- Seja claro, didático e acessível
+- Use exemplos práticos e contextualizados para o Brasil quando possível
+- Se a pergunta estiver fora do seu escopo (inovação tecnológica na educação), gentilmente redirecione para o tema
+- Seja conciso mas completo — evite respostas muito longas
+- Quando citar ferramentas ou plataformas, mencione opções gratuitas e pagas`;
+
+const TOOLS = [
+  {
+    name: "buscar_conteudo_educacional",
+    description: "Busca informações detalhadas sobre um tópico de inovação tecnológica na educação",
+    input_schema: {
+      type: "object",
+      properties: {
+        topico: { type: "string", description: "Tópico educacional a pesquisar" },
+        aspecto: { type: "string", description: "Aspecto específico: tendencias, ferramentas, beneficios, exemplos" }
+      },
+      required: ["topico"]
+    }
+  },
+  {
+    name: "listar_ferramentas",
+    description: "Lista ferramentas ou plataformas tecnológicas educacionais relevantes",
+    input_schema: {
+      type: "object",
+      properties: {
+        categoria: { type: "string", description: "Categoria: EAD, gamificacao, IA, colaboracao, avaliacao" },
+        nivel: { type: "string", description: "Nível: basico, medio, superior, corporativo" }
+      },
+      required: ["categoria"]
+    }
+  }
+];
+
+function executeTool(name, input) {
+  if (name === "buscar_conteudo_educacional") {
+    return JSON.stringify({
+      status: "encontrado",
+      topico: input.topico,
+      aspecto: input.aspecto || "geral",
+      instrucao: `Use seu conhecimento especializado para responder sobre "${input.topico}" com foco em ${input.aspecto || "aspectos gerais"}, incluindo contexto brasileiro quando relevante.`
+    });
+  }
+  if (name === "listar_ferramentas") {
+    return JSON.stringify({
+      status: "listado",
+      categoria: input.categoria,
+      nivel: input.nivel || "todos",
+      instrucao: `Liste ferramentas/plataformas de "${input.categoria}" para nível "${input.nivel || "todos"}", incluindo opções gratuitas e pagas disponíveis no Brasil.`
+    });
+  }
+  return JSON.stringify({ erro: "Ferramenta não encontrada" });
+}
+
+let messages = [];
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function suggest(text) {
+  document.getElementById('userInput').value = text;
+  sendMessage();
+}
+
+function setStatus(loading) {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  if (loading) {
+    dot.classList.add('loading');
+    txt.textContent = 'Pensando...';
+  } else {
+    dot.classList.remove('loading');
+    txt.textContent = 'Online';
+  }
+}
+
+function addUserMsg(text) {
+  const area = document.getElementById('chatArea');
+  const welcome = area.querySelector('.welcome');
+  if (welcome) welcome.remove();
+  const div = document.createElement('div');
+  div.className = 'msg-user';
+  div.textContent = text;
+  area.appendChild(div);
+  div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function createAgentBubble() {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'msg-agent';
+
+  const typing = document.createElement('div');
+  typing.className = 'typing';
+  typing.id = 'typingIndicator';
+  typing.innerHTML = '<span></span><span></span><span></span>';
+  div.appendChild(typing);
+
+  area.appendChild(div);
+  typing.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  return div;
+}
+
+function addStep(bubble, type, label, text) {
+  const typing = document.getElementById('typingIndicator');
+  if (typing) typing.remove();
+
+  const step = document.createElement('div');
+  step.className = `step ${type}`;
+  step.innerHTML = `<div class="step-label">${label}</div><div class="step-text">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
+  bubble.appendChild(step);
+  step.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function addAnswer(bubble, text) {
+  const typing = document.getElementById('typingIndicator');
+  if (typing) typing.remove();
+
+  const step = document.createElement('div');
+  step.className = 'step answer';
+  step.innerHTML = `<div class="step-label">Resposta</div><div class="step-text">${text.replace(/\n/g, '<br>')}</div>`;
+  bubble.appendChild(step);
+  step.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function sendMessage() {
+  const input = document.getElementById('userInput');
+  const btn = document.getElementById('sendBtn');
+  const text = input.value.trim();
+  if (!text || btn.disabled) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  btn.disabled = true;
+  setStatus(true);
+
+  addUserMsg(text);
+  messages.push({ role: 'user', content: text });
+
+  const bubble = createAgentBubble();
+  let iteration = 0;
+
+  while (iteration < 4) {
+    iteration++;
+    let data;
+    try {
+      const res = await fetch('https://proxy-educacao.intelectus247.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1024,
+          system: SYSTEM_PROMPT,
+          tools: TOOLS,
+          messages: messages
+        })
+      });
+      data = await res.json();
+    } catch(e) {
+      addStep(bubble, 'obs', 'Erro', 'Falha na conexão. Tente novamente.');
+      break;
+    }
+
+    if (data.error) {
+      addStep(bubble, 'obs', 'Erro', data.error.message || 'Erro desconhecido.');
+      break;
+    }
+
+    const toolUses = data.content.filter(b => b.type === 'tool_use');
+    const textBlocks = data.content.filter(b => b.type === 'text');
+
+    if (toolUses.length > 0) {
+      messages.push({ role: 'assistant', content: data.content });
+      const toolResults = [];
+      for (const tu of toolUses) {
+        addStep(bubble, 'think', 'Analisando', `Buscando informações sobre: ${JSON.stringify(tu.input)}`);
+        addStep(bubble, 'act', 'Consultando', `Ferramenta: ${tu.name}`);
+        const result = executeTool(tu.name, tu.input);
+        addStep(bubble, 'obs', 'Dados obtidos', `Informações recuperadas com sucesso.`);
+        toolResults.push({ type: 'tool_result', tool_use_id: tu.id, content: result });
+      }
+      messages.push({ role: 'user', content: toolResults });
+    } else {
+      const finalText = textBlocks.map(b => b.text).join('\n');
+      messages.push({ role: 'assistant', content: finalText });
+      addAnswer(bubble, finalText);
+      break;
+    }
+
+    if (data.stop_reason === 'end_turn') break;
+  }
+
+  btn.disabled = false;
+  setStatus(false);
+}
+</script>
+</body>
+</html>
